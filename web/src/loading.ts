@@ -12,7 +12,7 @@ export function showLoading(trackId: string, isTouch: boolean): Loader {
       <div id="rs3-ld-go" style="display:none;margin-top:28px">
         <div style="font-weight:900;font-size:clamp(20px,4.5vw,30px);text-transform:uppercase;letter-spacing:.04em">${isTouch ? 'Tap to start' : 'Press any key'}</div>
         <div style="color:#bbb;font-size:14px;line-height:1.7;margin-top:12px">${isTouch
-          ? 'Hold <b>GAS</b> to go, <b>BRAKE</b> to slow down.<br>Steer with <b>◀</b> and <b>▶</b>. Turn the phone sideways.'
+          ? 'Hold <b>GAS</b> to go, <b>BRAKE</b> to slow down.<br>Steer with <b>◀</b> and <b>▶</b>. Turn the phone sideways.<br><span style="color:#888">For engine sound, flip the ringer switch on.</span>'
           : '<b>↑</b> gas &nbsp; <b>↓</b> or <b>space</b> brake &nbsp; <b>← →</b> steer<br><b>R</b> puts the car back on track'}</div>
       </div>
       <div id="rs3-ld-err" style="display:none;color:#f66;font-size:14px;margin-top:16px"></div>

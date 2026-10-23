@@ -2,8 +2,8 @@
 
 ## Where the live site runs
 
-- Hosting: Vercel, project `rs3-web` on the DapperLogic team (`dapper-logic`).
-- Live URL: https://rs3-web.vercel.app
+- Hosting: Vercel, project `rs3-revival` on the DapperLogic team (`dapper-logic`).
+- Live URL: https://rs3-revival.vercel.app
 - Source: this GitHub repository, `main` branch, connected through the Vercel Git integration.
 - Project settings: Root Directory `web`, Framework `Vite`, build `npm run build` (runs `tsc && vite build`), output `dist`.
 
@@ -35,7 +35,7 @@ The store answers with `access-control-allow-origin: *`, so the vercel.app origi
 Needs the store's read-write token. From the repo root:
 
 ```sh
-cd web && npx vercel@latest link --project rs3-web --scope dapper-logic && npx vercel@latest env pull && cd ..
+cd web && npx vercel@latest link --project rs3-revival --scope dapper-logic && npx vercel@latest env pull && cd ..
 cd scripts && npm install && cd ..
 node scripts/upload-data.mjs /path/to/DataBin /path/to/setups
 ```
@@ -51,7 +51,7 @@ The script uploads only the needed archives, skips files already present with th
 ## Checking a deployment
 
 ```sh
-curl -sI https://rs3-web.vercel.app | head -1                                  # 200
+curl -sI https://rs3-revival.vercel.app | head -1                                  # 200
 curl -sI https://q3rbsepk5nkybqh6.public.blob.vercel-storage.com/data/Tracks0.mfd | grep -iE "^HTTP|content-length"   # 200, ~6.7 MB
 ```
 

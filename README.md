@@ -2,7 +2,7 @@
 
 Racing Simulation 3 is a Formula One game from 2002 (Ubisoft Paris, PC, with a PS2 version in 2003). This project brings it back as a web game that runs on a phone. The engine is rewritten in TypeScript and three.js, and it drives the original game's own tracks, cars, textures, physics data and sounds.
 
-**Play it:** https://rs3-web.vercel.app
+**Play it:** https://rs3-revival.vercel.app
 
 Start menu at `/`, pick a track and a car. Direct link to drive mode: `/?track=0&car=0`.
 
@@ -29,8 +29,8 @@ Model: Claude Fable 5.1 in Claude Code. Measured from the session transcript: 92
 The game data is not included and will not be. You need your own copy of Racing Simulation 3 for PC. Once you have it installed somewhere:
 
 ```sh
-git clone https://github.com/maxsorto/rs3-web.git
-cd rs3-web
+git clone https://github.com/maxsorto/rs3-revival.git
+cd rs3-revival
 
 # 1. Point the app at the game's DataBin folder (symlink or copy)
 ln -s "/path/to/Racing Simulation 3/DataBin" web/public/data
@@ -80,8 +80,16 @@ Next:
 - `notes/README.md` the working notes: file formats, engine map, decisions, progress.
 - `DEPLOY.md` how the live site is built and where it gets its data.
 
-## Credits and license
+## Credits, license and legal
 
-Racing Simulation 3 was made by Ubisoft Paris. This is a fan re-implementation with no affiliation to or endorsement by Ubisoft. All game assets, data and names belong to their owners and are not part of this repository.
+Racing Simulation 3 was created and published by Ubisoft. "Racing Simulation 3", Ubisoft and all related names and marks are trademarks of their respective owners.
 
-The code in this repository is MIT licensed, see [LICENSE](LICENSE). The license does not cover the game or any of its files.
+This is an unofficial, non-commercial fan project made for study and preservation. It is not affiliated with, endorsed by, sponsored by or otherwise connected to Ubisoft or anyone who worked on the original game. Nothing here claims any rights over the game.
+
+What this repository contains is only original code written for this project (the TypeScript engine, the decoding tools and the notes). It is released under the MIT license, see [LICENSE](LICENSE). The MIT license covers only that code.
+
+What this repository does not contain: no part of the game. No executables, no decompiled or disassembled code from the game, no models, textures, sounds, tracks, setup data or any other asset. The game's files are not distributed here and are not included in any release. To run the project yourself you need your own legitimately obtained copy of the game, which the project reads at run time and never redistributes. Users are responsible for complying with the game's license and the laws that apply to them.
+
+The playable site exists so that people can see the result without any setup. It makes no money, has no ads and does not sell anything.
+
+Takedown: if you are a rights holder and believe anything here or on the playable site should not be available, open an issue on this repository or contact the maintainer through GitHub and it will be taken down promptly. No argument, no delay.

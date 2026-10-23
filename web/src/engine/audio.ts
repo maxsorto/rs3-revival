@@ -47,4 +47,11 @@ export class EngineAudio {
     });
   }
   set volume(v: number) { if (this.master) this.master.gain.value = v; }
+  get state(): string { return this.ctx ? this.ctx.state : 'none'; }
+  /** attach unlock attempts to every gesture type (iOS honours touchend/click, not always pointerdown) until the context runs */
+  attachUnlock(): void {
+    const tryUnlock = () => { this.unlock(); if (this.ctx && this.ctx.state === 'running') for (const t of types) removeEventListener(t, tryUnlock, true); };
+    const types = ['touchend', 'click', 'pointerup', 'keydown'];
+    for (const t of types) addEventListener(t, tryUnlock, true);
+  }
 }

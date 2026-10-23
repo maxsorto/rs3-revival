@@ -1,10 +1,10 @@
 import { startViewer } from './viewer';
 import { startGame } from './game';
-import { startCarParts } from './carparts';
+import { startCarParts, startCarShots } from './carparts';
 import { startMenu } from './menu';
 const q = new URLSearchParams(location.search);
 const track = q.get('track') ?? '0';
-const showMenu = !q.has('track') && !q.has('view') && !q.has('carparts');
+const showMenu = !q.has('track') && !q.has('view') && !q.has('carparts') && !q.has('carshots');
 document.body.style.margin = '0'; document.body.style.overflow = 'hidden'; document.body.style.touchAction = 'none';
 const app = document.getElementById('app')!;
 const hud = document.createElement('pre');
@@ -13,4 +13,4 @@ if (!showMenu && (q.has('debug') || q.has('view') || q.has('carparts'))) documen
 const log = (s: string) => { hud.textContent += s + '\n'; console.log(s); };
 if (showMenu) { document.title = 'Racing Simulation 3'; startMenu(app); }
 else log(`RS3 track ${track}`);
-if (!showMenu) (q.has('carparts') ? startCarParts(app, log) : q.has('view') ? startViewer(track, app, log) : startGame(track, app, log)).catch(e => log('ERROR ' + e));
+if (!showMenu) (q.has('carshots') ? startCarShots(app, log) : q.has('carparts') ? startCarParts(app, log) : q.has('view') ? startViewer(track, app, log) : startGame(track, app, log)).catch(e => log('ERROR ' + e));
