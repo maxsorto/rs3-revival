@@ -1,4 +1,5 @@
 // Intro splash: hero car, slamming title, speed streaks. Resolves on tap / key. Skipped when coming back from the game (sessionStorage).
+import { dataUrl } from './paths';
 export function showIntro(host: HTMLElement): Promise<void> {
   const root = document.createElement('div');
   root.id = 'rs3-intro';
@@ -32,6 +33,12 @@ export function showIntro(host: HTMLElement): Promise<void> {
         #rs3-intro .t3{font-size:clamp(60px,22vw,180px)}
         #rs3-intro .rev{bottom:max(13vh,calc(env(safe-area-inset-bottom) + 11vh))}
       }
+      #rs3-intro .badge{position:absolute;right:max(5vw,env(safe-area-inset-right));top:max(7vh,env(safe-area-inset-top));display:flex;align-items:center;gap:12px;opacity:0;transform:translateY(-14px);animation:rs3-badge .6s cubic-bezier(.2,.9,.2,1) 1s forwards}
+      @keyframes rs3-badge{to{opacity:1;transform:none}}
+      #rs3-intro .badge img{width:clamp(56px,8vw,96px);height:clamp(56px,8vw,96px);border-radius:14px;object-fit:cover;border:2px solid rgba(255,255,255,.85);box-shadow:0 10px 30px rgba(0,0,0,.6)}
+      #rs3-intro .badge .lbl{font-weight:900;font-size:clamp(10px,1.4vw,13px);letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.75)}
+      #rs3-intro .badge .num{font-weight:900;font-size:clamp(20px,3vw,34px);line-height:1;color:#ffcc33;letter-spacing:-.03em}
+      @media (orientation: portrait){ #rs3-intro .badge{top:auto;bottom:max(13vh,calc(env(safe-area-inset-bottom) + 11vh));right:max(6vw,env(safe-area-inset-right))} }
       #rs3-intro.out{animation:rs3-out .5s ease forwards}
       @keyframes rs3-out{to{opacity:0;transform:scale(1.04)}}
     </style>
@@ -41,6 +48,7 @@ export function showIntro(host: HTMLElement): Promise<void> {
     <img class="car" src="/hero.png" alt="" draggable="false">
     <div class="title"><span class="t t1">Racing</span><span class="t t2">Simulation</span><span class="t t3">3</span></div>
     <div class="rev"><span>Revival</span></div>
+    <div class="badge"><img src="${dataUrl('/driver.jpg')}" alt="" draggable="false" onerror="this.parentNode.remove()"><div><div class="lbl">Driver</div><div class="num">#1</div></div></div>
     <div class="cta">${('ontouchstart' in window) ? 'Tap to continue' : 'Press any key'}</div>
     <div class="bar"></div>`;
   host.appendChild(root);

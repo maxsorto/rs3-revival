@@ -37,3 +37,4 @@ __pycache__/
 .idea/
 .vscode/
 scripts/node_modules/
+web/public/driver.jpg

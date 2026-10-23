@@ -1,6 +1,7 @@
 // Start menu: one screen, no page scroll. Two horizontal strips (track minimaps, car previews) and a DRIVE button.
 const TRACKS = [0, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
 const CARS = 22;
+import { dataUrl } from './paths';
 export function startMenu(host: HTMLElement): void {
   const saved = (() => { try { return JSON.parse(localStorage.getItem('rs3.menu') ?? '{}'); } catch { return {}; } })() as { track?: number; car?: number };
   let track = TRACKS.includes(saved.track ?? -1) ? saved.track! : 0, car = Math.min(CARS - 1, Math.max(0, saved.car ?? 0));
@@ -10,7 +11,11 @@ export function startMenu(host: HTMLElement): void {
     <style>
       .m-head{padding:max(14px,env(safe-area-inset-top)) 16px 0;display:flex;align-items:baseline;gap:12px;flex:0 0 auto}
       .m-h1{font-weight:900;font-size:clamp(18px,4.2vw,30px);letter-spacing:-.02em;text-transform:uppercase;line-height:1;margin:0;white-space:nowrap}
-      .m-sub{color:#8a8a8a;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .m-sub{color:#8a8a8a;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1 1 auto;min-width:0}
+      .m-drv{display:flex;align-items:center;gap:8px;flex:0 0 auto;margin-left:auto;align-self:center}
+      .m-drv img{width:34px;height:34px;border-radius:9px;object-fit:cover;border:1.5px solid rgba(255,255,255,.8)}
+      .m-drv span{font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:#8a8a8a}
+      .m-drv b{display:block;font-size:14px;color:#ffcc33;letter-spacing:-.02em}
       .m-sec{flex:0 1 auto;display:flex;flex-direction:column;padding-top:10px}
       .m-fill{flex:1 1 0}
       .m-lbl{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#8a8a8a;padding:0 16px 6px;display:flex;justify-content:space-between;flex:0 0 auto}
@@ -33,7 +38,7 @@ export function startMenu(host: HTMLElement): void {
       .m-wipe.go{transition:transform .45s cubic-bezier(.7,0,.3,1);transform:translateX(0)}
       .m-go{width:100%;height:54px;transition:transform .12s;border:0;border-radius:14px;background:#fff;color:#111;font-weight:900;font-size:18px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent}
     </style>
-    <div class="m-head"><h1 class="m-h1">Racing Simulation 3</h1><span class="m-sub">web port, original tracks, cars and physics</span></div>
+    <div class="m-head"><h1 class="m-h1">Racing Simulation 3</h1><span class="m-sub">web port, original tracks, cars and physics</span><div class="m-drv"><img src="${dataUrl('/driver.jpg')}" alt="" onerror="this.parentNode.remove()"><div><span>Driver</span><b>#1</b></div></div></div>
     <div class="m-sec"><div class="m-lbl"><span>Track</span><b id="m-tn"></b></div><div class="m-strip" id="m-tracks"></div></div>
     <div class="m-sec"><div class="m-lbl"><span>Car</span><b id="m-cn"></b></div><div class="m-strip" id="m-cars"></div></div>
     <div class="m-fill"></div>
