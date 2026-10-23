@@ -23,7 +23,15 @@ export function startMenu(host: HTMLElement): void {
       .m-card span{display:block;font-size:11px;font-weight:700;margin-top:3px;white-space:nowrap}
       .m-card.on{border-color:#fff;background:#262626}
       .m-foot{flex:0 0 auto;padding:8px 16px max(12px,env(safe-area-inset-bottom))}
-      .m-go{width:100%;height:54px;border:0;border-radius:14px;background:#fff;color:#111;font-weight:900;font-size:18px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent}
+      .m-card{transition:transform .18s cubic-bezier(.2,.9,.2,1),border-color .18s,background .18s;animation:m-in .5s cubic-bezier(.2,.9,.2,1) both}
+      .m-card:active{transform:scale(.96)}
+      .m-card.on{transform:scale(1.03)}
+      @keyframes m-in{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+      .m-head,.m-lbl,.m-foot{animation:m-in .5s cubic-bezier(.2,.9,.2,1) both}
+      .m-go:active{transform:scale(.98)}
+      .m-wipe{position:fixed;inset:0;z-index:40;background:#06101f;transform:translateX(-102%);pointer-events:none}
+      .m-wipe.go{transition:transform .45s cubic-bezier(.7,0,.3,1);transform:translateX(0)}
+      .m-go{width:100%;height:54px;transition:transform .12s;border:0;border-radius:14px;background:#fff;color:#111;font-weight:900;font-size:18px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;-webkit-tap-highlight-color:transparent}
     </style>
     <div class="m-head"><h1 class="m-h1">Racing Simulation 3</h1><span class="m-sub">web port, original tracks, cars and physics</span></div>
     <div class="m-sec"><div class="m-lbl"><span>Track</span><b id="m-tn"></b></div><div class="m-strip" id="m-tracks"></div></div>
@@ -42,15 +50,18 @@ export function startMenu(host: HTMLElement): void {
   for (const id of TRACKS) {
     const c = document.createElement('div'); c.className = 'm-card'; c.dataset.id = String(id);
     c.innerHTML = `<img src="/minimaps/${id}.png" alt=""><span>TRACK ${String(id).padStart(2, '0')}</span>`;
+    c.style.animationDelay = `${0.05 + trackCards.length * 0.04}s`;
     c.addEventListener('click', () => { track = id; sync(); }); tg.appendChild(c); trackCards.push(c);
   }
   for (let i = 0; i < CARS; i++) {
     const c = document.createElement('div'); c.className = 'm-card car'; c.dataset.id = String(i);
     c.innerHTML = `<img src="/cars/${i}.png" alt=""><span>CAR ${i + 1}</span>`;
+    c.style.animationDelay = `${0.15 + carCards.length * 0.04}s`;
     c.addEventListener('click', () => { car = i; sync(); }); cg.appendChild(c); carCards.push(c);
   }
   // mouse wheel scrolls the strips sideways on desktop
   for (const strip of [tg, cg]) strip.addEventListener('wheel', e => { if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) { strip.scrollLeft += e.deltaY; e.preventDefault(); } }, { passive: false });
   sync(); requestAnimationFrame(() => sync(true));
-  root.querySelector('#m-go')!.addEventListener('click', () => { location.href = `/?track=${track}&car=${car}`; });
+  const wipe = document.createElement('div'); wipe.className = 'm-wipe'; root.appendChild(wipe);
+  root.querySelector('#m-go')!.addEventListener('click', () => { try { sessionStorage.setItem('rs3.seenIntro', '1'); } catch { /* ignore */ } wipe.classList.add('go'); setTimeout(() => { location.href = `/?track=${track}&car=${car}`; }, 460); });
 }

@@ -2,9 +2,10 @@
 export interface Loader { track: (name: string, loaded: number, total: number) => void; done: (onGesture?: () => void) => Promise<void>; fail: (msg: string) => void }
 export function showLoading(trackId: string, isTouch: boolean): Loader {
   const root = document.createElement('div');
-  root.style.cssText = 'position:fixed;inset:0;z-index:20;background:#111;color:#fff;font-family:-apple-system,Helvetica Neue,Helvetica,Arial,sans-serif;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;user-select:none;-webkit-user-select:none;transition:opacity .5s';
+  root.style.cssText = 'position:fixed;inset:0;z-index:20;background:#06101f;color:#fff;font-family:-apple-system,Helvetica Neue,Helvetica,Arial,sans-serif;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;user-select:none;-webkit-user-select:none;transition:opacity .5s';
   root.innerHTML = `
-    <div style="width:min(420px,90vw)">
+    <style>@keyframes rs3-ld-in{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}</style>
+    <div style="width:min(420px,90vw);animation:rs3-ld-in .6s cubic-bezier(.2,.9,.2,1) both">
       <img src="/minimaps/${trackId}.png" alt="" style="width:min(42vh,180px);height:auto;display:block;margin:0 auto 10px;filter:drop-shadow(0 0 12px rgba(255,255,255,.15))">
       <div style="font-weight:900;font-size:clamp(22px,5vw,34px);letter-spacing:-.02em;text-transform:uppercase;line-height:1">Track ${String(trackId).padStart(2, '0')}</div>
       <div id="rs3-ld-sub" style="color:#9a9a9a;font-size:13px;margin:10px 0 14px;min-height:18px">Loading track data</div>
