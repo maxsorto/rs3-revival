@@ -99,7 +99,7 @@ export async function startGame(track: string, host: HTMLElement, log: (s: strin
   sndLabel(); setInterval(sndLabel, 500);
   sndBtn.style.cssText = (isTouch ? 'position:fixed;right:max(12px,env(safe-area-inset-right));top:max(96px,calc(env(safe-area-inset-top) + 88px));' : 'position:fixed;right:12px;bottom:44px;') + 'font:700 12px ui-monospace;color:#fff;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.5);border-radius:8px;padding:6px 10px;z-index:5;-webkit-tap-highlight-color:transparent';
   // a real click/touchend on this button is a full user activation on iOS: create or resume the context right here
-  const sndTap = () => { if (!soundOn || audio.state !== 'running') { soundOn = true; audio.unlock(); audio.attachUnlock(); audio.volume = 0.35; } else { soundOn = false; audio.volume = 0; } sndLabel(); };
+  const sndTap = () => { if (!soundOn || audio.state !== 'running') { soundOn = true; audio.unlock(); audio.attachUnlock(); audio.volume = 0.5; } else { soundOn = false; audio.volume = 0; } sndLabel(); };
   sndBtn.addEventListener('click', sndTap); sndBtn.addEventListener('touchend', e => { e.preventDefault(); sndTap(); }, { passive: false });
   document.body.appendChild(sndBtn);
   if (!isTouch) {
@@ -144,7 +144,7 @@ export async function startGame(track: string, host: HTMLElement, log: (s: strin
       camera.position.lerp(g2t(cp, camPos), 0.2); camera.lookAt(g2t(ct, camTarget));
     }
     const kmh = car.speedNorm() * 3.6, gear = car.gearbox.gear;
-    audio.update(car.engine.omega / 0.10472, car.cmd.throttle);
+    audio.update(car.engine.omega / 0.10472, car.cmd.throttle, car.engine.torque, car.speedNorm(), car.gearbox.gear, frame);
     hud.textContent = `${kmh.toFixed(0)} km/h  ${gear === -1 ? 'N' : gear === 0 ? 'R' : gear}  ${(car.engine.omega / 0.10472).toFixed(0)} rpm`;
     lapHud.textContent = `LAP ${Math.max(1, timer.lap)}  ${fmtTime(timer.lapStart >= 0 ? timer.current : -1)}\nLAST ${fmtTime(timer.last)}\nBEST ${fmtTime(timer.best)}${sectorBeacons.length ? `\nS${timer.sector}/${sectorBeacons.length}` : ''}`;
     sky.position.copy(camera.position);
