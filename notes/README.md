@@ -3,12 +3,12 @@
 Goal: bring RS3 back to life, ultimately as a browser build that runs on iOS Safari.
 
 ## Sources on disk
-- PC (pre-patched portable install, abandonware pack): ~/rs3-port/pc/game  (orig: ~/Downloads/Racing Simulation)
+- PC: own copy of the game, installed at ~/rs3-port/pc/game (not in the repo)
   - RS3.exe 1,888,256 B, MSVC x86 PE, sections .text/.rdata/.data/.rsrc; no RTTI names; SafeDisc marker string present ("BoG_") — DRM status TBD in Ghidra
   - Renderer is behind Ubisoft's own "IM" DLLs loaded at runtime: DLL/IM_DX6_vr.dll (also references IM_DX3_vr.dll). DDraw.dll + D3DImm.dll (2020) = dgVoodoo2-style wrappers shipped by the pack
   - binkw32.dll (2021 build), IFC21.dll = Immersion force-feedback
   - Video/RS3.bik, Video/legal.bik
-- PS2 (PAL, SLES-51633 v1.01, 5 langs): ~/Downloads/Racing Simulation 3/rs301.iso (converted from bin/cue with bchunk)
+- PS2 (PAL, SLES-51633 v1.01, 5 langs): own disc image, converted from bin/cue with bchunk (not in the repo)
   - RS3.ELF is NOT STRIPPED: 10,661 symbols, 5,141 functions, GCC2 C++ mangling → full class/method names. Extracted to ~/rs3-port/ps2-disc (rs3.nm.txt, funcs.txt)
   - PCSX2 2.8.2 installed (/Applications/PCSX2.app). No PS2 BIOS on this Mac — needs Max's own dump.
 
