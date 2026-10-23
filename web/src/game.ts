@@ -91,7 +91,7 @@ export async function startGame(track: string, host: HTMLElement, log: (s: strin
   const placeHud = () => { if (isTouch) hud.style.bottom = innerHeight > innerWidth ? 'calc(30vh + 28px)' : 'max(16px,env(safe-area-inset-bottom))'; };
   hud.style.cssText = isTouch
     ? 'position:fixed;left:50%;transform:translateX(-50%);bottom:max(16px,env(safe-area-inset-bottom));font:700 clamp(14px,2.6vw,22px) ui-monospace;color:#fff;text-shadow:0 1px 3px #000;text-align:center;pointer-events:none;white-space:nowrap'
-    : 'position:fixed;right:12px;bottom:40px;font:700 clamp(18px,3.2vw,28px) ui-monospace;color:#fff;text-shadow:0 1px 3px #000;text-align:right;pointer-events:none';
+    : 'position:fixed;right:12px;bottom:84px;font:700 clamp(18px,3.2vw,28px) ui-monospace;color:#fff;text-shadow:0 1px 3px #000;text-align:right;pointer-events:none';
   document.body.appendChild(hud); placeHud(); addEventListener('resize', placeHud);
   const lapHud = document.createElement('div');
   lapHud.style.cssText = 'position:fixed;right:12px;top:max(12px,env(safe-area-inset-top));font:700 clamp(13px,2.4vw,20px) ui-monospace;color:#fff;text-shadow:0 1px 3px #000;text-align:right;pointer-events:none;white-space:pre';

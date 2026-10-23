@@ -1,14 +1,31 @@
-# Racing Simulation 3, in the browser
+<p align="center"><img src="docs/images/hero.png" alt="Racing Simulation 3 Revival" width="100%"></p>
+
+# Racing Simulation 3 Revival
 
 Racing Simulation 3 is a Formula One game from 2002 (Ubisoft Paris, PC, with a PS2 version in 2003). This project brings it back as a web game that runs on a phone. The engine is rewritten in TypeScript and three.js, and it drives the original game's own tracks, cars, textures, physics data and sounds.
 
-**Play it:** https://rs3-revival.vercel.app
-
-Start menu at `/`, pick a track and a car. Direct link to drive mode: `/?track=0&car=0`.
+<p align="center"><b>Play it: <a href="https://rs3-revival.vercel.app">rs3-revival.vercel.app</a></b><br>Phone or desktop. Turn the phone sideways.</p>
 
 It is a fan project. It is not an emulator and not a recompiled executable. Nothing from the game is in this repository (see below).
 
+<table>
+  <tr>
+    <td width="50%"><img src="docs/images/intro.png" alt="Intro screen"></td>
+    <td width="50%"><img src="docs/images/menu.png" alt="Track and car selection"></td>
+  </tr>
+  <tr>
+    <td><img src="docs/images/drive-desktop.png" alt="Driving on desktop"></td>
+    <td><img src="docs/images/drive-track13.png" alt="Another circuit"></td>
+  </tr>
+  <tr>
+    <td><img src="docs/images/drive-phone.png" alt="Phone, landscape, touch pads"></td>
+    <td><img src="docs/images/pause.png" alt="Pause menu with the control options"></td>
+  </tr>
+</table>
+
 ## How it was made
+
+<p align="center"><img src="docs/images/pipeline.svg" alt="PS2 executable, Ghidra, PC game files, TypeScript engine, browser" width="100%"></p>
 
 - The PS2 disc shipped its executable unstripped, so every C++ class and function kept its real name (`F1MC_F1Car::vMove`, `PART_Wheel::vComputeXYForce`, and so on).
 - That binary was decompiled with Ghidra. The names made it possible to read the PC version's code and files with the right vocabulary.
@@ -52,9 +69,11 @@ The live site exists so you can just play without any of this. If you want to ch
 
 ## Controls
 
+<p align="center"><img src="docs/images/loading.png" alt="Loading screen with the start options" width="70%"></p>
+
 Keyboard: Up or W accelerates, Down, S or Space brakes, Left/Right or A/D steer, Q and E shift down and up, R puts the car back on the track.
 
-Touch: on-screen buttons (steer left, steer right, BRAKE, GAS), a TILT toggle for steering with the phone, and RESET and MENU buttons at the top. There is a tap-to-start screen after loading.
+Touch: left thumb steers with the two pads, right thumb brakes. Auto gas is on by default so the car accelerates by itself; turn it off in the pause menu to get a GAS pad. Tilt steering (hold the phone like a wheel) is in the pause menu too. RESET puts the car back on the track, PAUSE opens the options, MENU goes back to the start screen.
 
 ## What's done and what's next
 

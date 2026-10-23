@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300" font-family="-apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0c224f"/><stop offset="1" stop-color="#06101f"/></linearGradient>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#ffcc33"/></marker>
+  </defs>
+  <rect width="1200" height="300" rx="18" fill="url(#bg)"/>
+  <g font-size="13" font-weight="800" fill="#9fb0cc" letter-spacing="2"><text x="40" y="44">HOW THE PORT WAS BUILT</text></g>
+  <g font-weight="900" fill="#fff" font-size="20">
+    <rect x="40" y="90" width="200" height="120" rx="14" fill="#15305f"/>
+    <text x="140" y="138" text-anchor="middle">PS2 disc</text>
+    <text x="140" y="168" text-anchor="middle" font-size="13" font-weight="500" fill="#c8d3e6">unstripped executable,</text>
+    <text x="140" y="188" text-anchor="middle" font-size="13" font-weight="500" fill="#c8d3e6">every function keeps its name</text>
+
+    <rect x="290" y="90" width="200" height="120" rx="14" fill="#15305f"/>
+    <text x="390" y="138" text-anchor="middle">Ghidra</text>
+    <text x="390" y="168" text-anchor="middle" font-size="13" font-weight="500" fill="#c8d3e6">decompile physics, loaders,</text>
+    <text x="390" y="188" text-anchor="middle" font-size="13" font-weight="500" fill="#c8d3e6">renderer with real names</text>
+
+    <rect x="540" y="90" width="200" height="120" rx="14" fill="#15305f"/>
+    <text x="640" y="138" text-anchor="middle">PC game files</text>
+    <text x="640" y="168" text-anchor="middle" font-size="13" font-weight="500" fill="#c8d3e6">archives, meshes, textures,</text>
+    <text x="640" y="188" text-anchor="middle" font-size="13" font-weight="500" fill="#c8d3e6">setups, sounds decoded</text>
+
+    <rect x="790" y="90" width="200" height="120" rx="14" fill="#15305f"/>
+    <text x="890" y="138" text-anchor="middle">TypeScript engine</text>
+    <text x="890" y="168" text-anchor="middle" font-size="13" font-weight="500" fill="#c8d3e6">physics ported line by line,</text>
+    <text x="890" y="188" text-anchor="middle" font-size="13" font-weight="500" fill="#c8d3e6">three.js renders the originals</text>
+
+    <rect x="1040" y="90" width="120" height="120" rx="14" fill="#e8321e"/>
+    <text x="1100" y="145" text-anchor="middle">Browser</text>
+    <text x="1100" y="172" text-anchor="middle" font-size="13" font-weight="500" fill="#ffe3df">phone or desktop</text>
+  </g>
+  <g stroke="#ffcc33" stroke-width="3" fill="none" marker-end="url(#arr)">
+    <path d="M240 150 L288 150"/><path d="M490 150 L538 150"/><path d="M740 150 L788 150"/><path d="M990 150 L1038 150"/>
+  </g>
+  <g font-size="13" fill="#9fb0cc"><text x="40" y="262">No emulator. No recompiled binary. The game's own data, read at run time by a new engine.</text></g>
+  <rect x="40" y="282" width="1120" height="6" rx="3" fill="#1b3f8a"/><rect x="40" y="282" width="380" height="6" rx="3" fill="#e8321e"/><rect x="420" y="282" width="180" height="6" fill="#ffcc33"/>
+</svg>
