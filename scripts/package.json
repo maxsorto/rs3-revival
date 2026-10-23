@@ -1,0 +1,12 @@
+{
+  "name": "rs3-web-scripts",
+  "private": true,
+  "type": "module",
+  "description": "Maintainer scripts. upload-data.mjs pushes the game archives the live site needs to the Vercel Blob store.",
+  "scripts": {
+    "upload-data": "node upload-data.mjs"
+  },
+  "dependencies": {
+    "@vercel/blob": "^2.0.0"
+  }
+}

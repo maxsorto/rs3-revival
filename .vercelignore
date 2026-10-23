@@ -1,0 +1,25 @@
+# Mirrors .gitignore for CLI deploys: never upload game data or derived files.
+pc
+ps2-disc
+decomp
+out
+ghidra
+evidence
+web/public/data
+web/public/setups
+web/node_modules
+web/dist
+web/.vercel
+.vercel
+.playwright-mcp
+*.iso
+*.bin
+*.cue
+*.mfd
+*.exe
+*.elf
+*.ELF
+*.bik
+.env
+.env.*
+*.local

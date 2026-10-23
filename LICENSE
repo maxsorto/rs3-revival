@@ -1,0 +1,37 @@
+MIT License
+
+Copyright (c) 2026 Max Sorto
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+----------------------------------------------------------------------------
+
+Scope of this license
+
+This license covers only the code written for this project: the TypeScript
+and three.js re-implementation in web/, the Python and Java tools in tools/,
+the track minimaps rendered by those tools, and the notes.
+
+It does NOT cover Racing Simulation 3 itself. The game's executables, data
+archives, track and car models, textures, sounds, setups, names, logos and
+any other original assets are the property of their respective owners
+(Ubisoft and its licensors). None of them are included in this repository,
+and nothing here grants any right to them. You need your own copy of the
+game to run this project. This is a fan re-implementation with no
+affiliation to or endorsement by Ubisoft.

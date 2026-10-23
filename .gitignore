@@ -1,0 +1,39 @@
+# ---- Game data and anything derived from the game binaries. Never commit. ----
+# Bring your own copy of the game; see README.md.
+pc/
+ps2-disc/
+decomp/
+out/
+ghidra/
+evidence/
+web/public/data
+web/public/data/
+web/public/setups
+web/public/setups/
+*.iso
+*.bin
+*.cue
+*.mfd
+*.exe
+*.elf
+*.ELF
+*.bik
+*.rec
+*.gzf
+
+# ---- Build / tooling ----
+web/node_modules/
+web/dist/
+web/.vercel/
+.vercel/
+.env
+.env.*
+*.local
+.playwright-mcp/
+__pycache__/
+*.pyc
+*.log
+.DS_Store
+.idea/
+.vscode/
+scripts/node_modules/
