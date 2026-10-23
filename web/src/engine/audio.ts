@@ -11,6 +11,7 @@ const LOOPS: Loop[] = [
 ];
 export class EngineAudio {
   private ctx: AudioContext | null = null; private master: GainNode | null = null; private ready = false; private buffers = new Map<number, AudioBuffer>();
+  errors: string[] = []; lastRpm = 0;
   constructor(private mfd: Mfd) {}
   /** call SYNCHRONOUSLY inside a user gesture handler (iOS only unlocks audio there); decoding continues asynchronously */
   unlock(): void {
@@ -26,7 +27,7 @@ export class EngineAudio {
   async start(): Promise<void> {
     if (!this.ctx) { this.unlock(); return; }
     const ctx = this.ctx, master = this.master; if (!master || this.ready || this.buffers.size) return;
-    await Promise.all(LOOPS.map(async l => { const e = this.mfd.byId(l.id); if (!e) return; const bytes = this.mfd.bytes(e); const copy = new ArrayBuffer(bytes.byteLength); new Uint8Array(copy).set(bytes); const buf = await ctx.decodeAudioData(copy); this.buffers.set(l.id, buf); }));
+    await Promise.all(LOOPS.map(async l => { const e = this.mfd.byId(l.id); if (!e) return; const bytes = this.mfd.bytes(e); const copy = new ArrayBuffer(bytes.byteLength); new Uint8Array(copy).set(bytes); try { const buf = await ctx.decodeAudioData(copy); this.buffers.set(l.id, buf); } catch (e) { this.errors.push(`${l.id.toString(16)}: ${String(e)}`); } }));
     for (const l of LOOPS) {
       const buf = this.buffers.get(l.id); if (!buf) continue;
       const src = ctx.createBufferSource(); src.buffer = buf; src.loop = true; const g = ctx.createGain(); g.gain.value = 0; src.connect(g); g.connect(master); src.start(); l.src = src; l.gain = g;
@@ -35,6 +36,7 @@ export class EngineAudio {
   }
   /** rpm → pitch/crossfade; throttle 0..1 → brightness (volume) */
   update(rpm: number, throttle: number): void {
+    this.lastRpm = rpm;
     if (!this.ready || !this.ctx) return;
     const f = Math.max(1500, rpm) / 60 * 5; const t = this.ctx.currentTime;
     let total = 0; const w: number[] = [];
@@ -48,6 +50,7 @@ export class EngineAudio {
   }
   set volume(v: number) { if (this.master) this.master.gain.value = v; }
   get state(): string { return this.ctx ? this.ctx.state : 'none'; }
+  debug(): Record<string, unknown> { return { state: this.state, ready: this.ready, buffers: [...this.buffers.keys()].map(k => k.toString(16)), errors: this.errors, master: this.master?.gain.value, gains: LOOPS.map(l => l.gain ? +l.gain.gain.value.toFixed(3) : null), rates: LOOPS.map(l => l.src ? +l.src.playbackRate.value.toFixed(3) : null), lastRpm: this.lastRpm, sampleRate: this.ctx?.sampleRate }; }
   /** attach unlock attempts to every gesture type (iOS honours touchend/click, not always pointerdown) until the context runs */
   attachUnlock(): void {
     const tryUnlock = () => { this.unlock(); if (this.ctx && this.ctx.state === 'running') for (const t of types) removeEventListener(t, tryUnlock, true); };

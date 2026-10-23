@@ -77,7 +77,7 @@ export async function startGame(track: string, host: HTMLElement, log: (s: strin
   const startAudio = () => { if (!mute) { audio.unlock(); audio.attachUnlock(); } };
   let started = false;
   loading.done(startAudio).then(() => { started = true; });
-  (window as unknown as { rs3: unknown }).rs3 = { car, road, grid, camera, carModel, timer, sectors, resetCar };
+  (window as unknown as { rs3: unknown }).rs3 = { car, road, grid, camera, carModel, timer, sectors, resetCar, audio };
   const orbit = new URLSearchParams(location.search).get('orbit');
   const hud = document.createElement('div');
   hud.style.cssText = isTouch
@@ -94,9 +94,13 @@ export async function startGame(track: string, host: HTMLElement, log: (s: strin
   const menuBtn = document.createElement('a'); menuBtn.textContent = 'MENU'; menuBtn.href = '/';
   menuBtn.style.cssText = (isTouch ? 'position:fixed;left:max(12px,env(safe-area-inset-left));top:max(10px,env(safe-area-inset-top));' : 'position:fixed;left:12px;bottom:12px;') + 'font:700 13px ui-monospace;color:#fff;text-decoration:none;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.5);border-radius:8px;padding:8px 14px;z-index:5';
   document.body.appendChild(menuBtn);
-  const sndBtn = document.createElement('button'); let soundOn = !mute; sndBtn.textContent = soundOn ? 'SOUND ON' : 'SOUND OFF';
+  const sndBtn = document.createElement('button'); let soundOn = !mute;
+  const sndLabel = () => { const st = audio.state; sndBtn.textContent = !soundOn ? 'SOUND OFF' : st === 'running' ? 'SOUND ON' : st === 'none' ? 'SOUND: TAP' : `SOUND: ${st.toUpperCase()}`; if (audio.errors.length) sndBtn.textContent += ' !'; };
+  sndLabel(); setInterval(sndLabel, 500);
   sndBtn.style.cssText = (isTouch ? 'position:fixed;right:max(12px,env(safe-area-inset-right));top:max(96px,calc(env(safe-area-inset-top) + 88px));' : 'position:fixed;right:12px;bottom:44px;') + 'font:700 12px ui-monospace;color:#fff;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.5);border-radius:8px;padding:6px 10px;z-index:5;-webkit-tap-highlight-color:transparent';
-  sndBtn.addEventListener('click', () => { soundOn = !soundOn; sndBtn.textContent = soundOn ? 'SOUND ON' : 'SOUND OFF'; if (soundOn) { audio.unlock(); audio.volume = 0.35; } else audio.volume = 0; });
+  // a real click/touchend on this button is a full user activation on iOS: create or resume the context right here
+  const sndTap = () => { if (!soundOn || audio.state !== 'running') { soundOn = true; audio.unlock(); audio.attachUnlock(); audio.volume = 0.35; } else { soundOn = false; audio.volume = 0; } sndLabel(); };
+  sndBtn.addEventListener('click', sndTap); sndBtn.addEventListener('touchend', e => { e.preventDefault(); sndTap(); }, { passive: false });
   document.body.appendChild(sndBtn);
   if (!isTouch) {
     const legend = document.createElement('div'); legend.innerHTML = '<b>↑</b> gas &nbsp; <b>↓</b>/space brake &nbsp; <b>← →</b> steer &nbsp; <b>R</b> reset';
