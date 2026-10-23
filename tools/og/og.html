@@ -5,7 +5,7 @@ html,body{margin:0;width:1200px;height:630px;overflow:hidden;background:#06101f}
 .streak{position:absolute;left:-200px;height:3px;width:1700px;background:linear-gradient(90deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.55) 45%,rgba(255,255,255,0) 100%);transform:rotate(-7deg);opacity:.45;filter:blur(.6px)}
 .glow{position:absolute;right:-120px;bottom:-240px;width:900px;height:620px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,68,40,.42),rgba(255,68,40,0));filter:blur(12px)}
 .track{position:absolute;left:560px;top:-40px;width:720px;height:720px;opacity:.09;filter:invert(0) brightness(3)}
-.car{position:absolute;left:380px;top:95px;width:900px;filter:drop-shadow(0 40px 50px rgba(0,0,0,.75))}
+.car{position:absolute;left:360px;top:150px;width:880px;filter:drop-shadow(0 40px 50px rgba(0,0,0,.75))}
 .title{position:absolute;left:64px;top:62px;line-height:.86;font-weight:900;letter-spacing:-.035em;text-transform:uppercase;text-shadow:0 6px 30px rgba(0,0,0,.6)}
 .t1{font-size:92px;display:block}
 .t2{font-size:92px;display:block}
@@ -14,6 +14,10 @@ html,body{margin:0;width:1200px;height:630px;overflow:hidden;background:#06101f}
 .rev span{display:inline-block;transform:skewX(8deg)}
 .sub{position:absolute;left:66px;bottom:38px;font-size:22px;font-weight:600;color:rgba(255,255,255,.78);letter-spacing:.02em}
 .sub b{color:#fff}
+.badge{position:absolute;right:56px;top:48px;display:flex;align-items:center;gap:14px}
+.badge img{width:104px;height:104px;border-radius:18px;object-fit:cover;border:3px solid rgba(255,255,255,.9);box-shadow:0 12px 36px rgba(0,0,0,.65)}
+.badge .lbl{font-weight:900;font-size:14px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.78)}
+.badge .num{font-weight:900;font-size:38px;line-height:1;color:#ffcc33;letter-spacing:-.03em;margin-top:2px}
 .bar{position:absolute;left:0;right:0;bottom:0;height:10px;background:linear-gradient(90deg,#e8321e 0 34%,#ffcc33 34% 50%,#fff 50% 100%)}
 </style></head><body><div class="wrap">
   <div class="streak" style="top:120px"></div><div class="streak" style="top:210px;opacity:.25"></div><div class="streak" style="top:330px;opacity:.3"></div><div class="streak" style="top:470px;opacity:.2"></div>
@@ -22,6 +26,7 @@ html,body{margin:0;width:1200px;height:630px;overflow:hidden;background:#06101f}
   <img class="car" src="/og/hero.png">
   <div class="title"><span class="t1">Racing</span><span class="t2">Simulation</span><span class="t3">3</span></div>
   <div class="rev"><span>Revival</span></div>
+  <div class="badge"><img src="/driver.jpg"><div><div class="lbl">Driver</div><div class="num">#1</div></div></div>
   <div class="sub">Play it in your browser, phone or desktop &nbsp;·&nbsp; <b>rs3-revival.vercel.app</b></div>
   <div class="bar"></div>
 </div></body></html>
