@@ -8,39 +8,66 @@ export class Input {
   private held = new Map<string, number>();   // on-screen button name → number of active pointers
   private tilt = false; private tiltSteer = 0; private tiltBtn: HTMLElement | null = null; private steerBtns: HTMLElement[] = [];
   readonly isTouch = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window || new URLSearchParams(location.search).has('touch');
-  constructor(el: HTMLElement) {
+  constructor(el: HTMLElement, private bar?: HTMLElement) {
     addEventListener('keydown', e => { this.keys.add(e.code); if (e.code === 'KeyE') this.state.gearUp = true; if (e.code === 'KeyQ') this.state.gearDown = true; });
     addEventListener('keyup', e => this.keys.delete(e.code));
     addEventListener('blur', () => this.keys.clear());
     el.addEventListener('touchstart', e => e.preventDefault(), { passive: false });   // no scroll/zoom on the canvas
     if (this.isTouch) this.buildTouchControls();
   }
+  private autoGas = true; private autoBtn: HTMLElement | null = null; private gasBtn: HTMLElement | null = null; private brakeBtn: HTMLElement | null = null;
   private buildTouchControls(): void {
+    try { this.autoGas = localStorage.getItem('rs3.autogas') !== '0'; } catch { /* ignore */ }
     const root = document.createElement('div');
     root.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:4;font-family:-apple-system,Helvetica,Arial,sans-serif;user-select:none;-webkit-user-select:none';
-    const mk = (name: string, label: string, css: string, color: string) => {
-      const b = document.createElement('div'); b.textContent = label;
-      b.style.cssText = `position:absolute;pointer-events:auto;display:flex;align-items:center;justify-content:center;border-radius:18px;background:${color};color:#fff;font-weight:900;font-size:22px;letter-spacing:.04em;box-shadow:inset 0 0 0 2px rgba(255,255,255,.35);touch-action:none;-webkit-tap-highlight-color:transparent;${css}`;
+    root.innerHTML = `<style>
+      .tp{position:absolute;pointer-events:auto;display:flex;align-items:center;justify-content:center;border-radius:18px;color:#fff;font-weight:900;font-size:22px;letter-spacing:.04em;box-shadow:inset 0 0 0 2px rgba(255,255,255,.35);touch-action:none;-webkit-tap-highlight-color:transparent;bottom:max(12px,env(safe-area-inset-bottom));width:min(21vw,150px);height:min(38vh,170px)}
+      .tp.left{left:max(12px,env(safe-area-inset-left));background:rgba(40,40,40,.55)}
+      .tp.right{left:calc(max(12px,env(safe-area-inset-left)) + min(21vw,150px) + 8px);background:rgba(40,40,40,.55)}
+      .tp.brake{right:calc(max(12px,env(safe-area-inset-right)) + min(21vw,150px) + 8px);background:rgba(190,40,40,.6)}
+      .tp.gas{right:max(12px,env(safe-area-inset-right));background:rgba(30,150,70,.6)}
+      .tp.brake.wide{right:max(12px,env(safe-area-inset-right));width:min(34vw,240px)}
+      .tp.hide{display:none}
+      @media (orientation: portrait){
+        .tp{width:23vw;height:15vh;font-size:18px}
+        .tp.left{left:max(10px,env(safe-area-inset-left))}
+        .tp.right{left:calc(max(10px,env(safe-area-inset-left)) + 23vw + 8px)}
+        .tp.gas{right:max(10px,env(safe-area-inset-right));width:34vw;height:15vh}
+        .tp.brake{right:max(10px,env(safe-area-inset-right));width:34vw;height:15vh;bottom:calc(max(12px,env(safe-area-inset-bottom)) + 15vh + 8px)}
+        .tp.brake.wide{bottom:max(12px,env(safe-area-inset-bottom));height:calc(30vh + 8px);width:34vw}
+      }
+      .tt{pointer-events:auto;padding:8px 12px;border-radius:10px;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.5);color:#fff;font-weight:800;font-size:12px;letter-spacing:.06em;-webkit-tap-highlight-color:transparent;white-space:nowrap}
+    </style>`;
+    const mk = (name: string, label: string, cls: string) => {
+      const b = document.createElement('div'); b.textContent = label; b.className = `tp ${cls}`;
       const on = (e: PointerEvent) => { e.preventDefault(); try { b.setPointerCapture(e.pointerId); } catch { /* synthetic pointer */ } this.held.set(name, (this.held.get(name) ?? 0) + 1); b.style.filter = 'brightness(1.35)'; };
       const off = (e: PointerEvent) => { e.preventDefault(); const n = (this.held.get(name) ?? 1) - 1; this.held.set(name, Math.max(0, n)); if (n <= 0) b.style.filter = ''; };
       b.addEventListener('pointerdown', on); b.addEventListener('pointerup', off); b.addEventListener('pointercancel', off); b.addEventListener('pointerleave', off); b.addEventListener('lostpointercapture', off);
       root.appendChild(b); return b;
     };
-    // two-thumb landscape layout: left thumb ◀ ▶ (steer), right thumb BRAKE | GAS (gas outermost, where the thumb rests)
-    const bottom = 'bottom:max(12px,env(safe-area-inset-bottom))', W = 'min(21vw,150px)', H = 'min(38vh,170px)';
-    const L = 'max(12px,env(safe-area-inset-left))', R = 'max(12px,env(safe-area-inset-right))';
-    this.steerBtns.push(mk('left', '◀', `left:${L};${bottom};width:${W};height:${H}`, 'rgba(40,40,40,.55)'));
-    this.steerBtns.push(mk('right', '▶', `left:calc(${L} + ${W} + 8px);${bottom};width:${W};height:${H}`, 'rgba(40,40,40,.55)'));
-    mk('brake', 'BRAKE', `right:calc(${R} + ${W} + 8px);${bottom};width:${W};height:${H}`, 'rgba(190,40,40,.6)');
-    mk('gas', 'GAS', `right:${R};${bottom};width:${W};height:${H}`, 'rgba(30,150,70,.6)');
-    // tilt steering toggle (gyroscope); iOS asks for permission inside the tap
-    const tb = document.createElement('div'); tb.textContent = 'TILT: OFF';
-    tb.style.cssText = `position:absolute;pointer-events:auto;left:50%;transform:translateX(-100%);margin-left:-8px;top:max(10px,env(safe-area-inset-top));padding:8px 14px;border-radius:10px;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.5);color:#fff;font-weight:800;font-size:13px;letter-spacing:.06em;-webkit-tap-highlight-color:transparent`;
+    this.steerBtns.push(mk('left', '◀', 'left'));
+    this.steerBtns.push(mk('right', '▶', 'right'));
+    this.brakeBtn = mk('brake', 'BRAKE', 'brake');
+    this.gasBtn = mk('gas', 'GAS', 'gas');
+    // top bar toggles: AUTO GAS (default on, like the big mobile racers) and TILT steering
+    const host = this.bar ?? root;
+    const ab = document.createElement('div'); ab.className = 'tt'; if (!this.bar) ab.style.cssText = 'left:50%;transform:translateX(-100%);margin-left:-8px';
+    ab.addEventListener('click', () => this.setAutoGas(!this.autoGas)); host.appendChild(ab); this.autoBtn = ab;
+    const tb = document.createElement('div'); tb.className = 'tt'; if (!this.bar) tb.style.cssText = 'left:50%;margin-left:8px'; tb.textContent = 'TILT: OFF';
     tb.addEventListener('click', () => { if (this.tilt) this.setTilt(false); else void this.enableTilt(); });
-    root.appendChild(tb); this.tiltBtn = tb;
+    host.appendChild(tb); this.tiltBtn = tb;
     let saved = false; try { saved = localStorage.getItem('rs3.tilt') === '1'; } catch { /* ignore */ }
     if (saved) tb.textContent = 'TILT: TAP TO ENABLE';
     document.body.appendChild(root);
+    if (this.bar) { const st = document.createElement('style'); st.textContent = '.tt{position:static}'; this.bar.appendChild(st); }
+    this.setAutoGas(this.autoGas);
+  }
+  private setAutoGas(on: boolean): void {
+    this.autoGas = on;
+    if (this.autoBtn) this.autoBtn.textContent = on ? 'AUTO GAS: ON' : 'AUTO GAS: OFF';
+    if (this.gasBtn) this.gasBtn.classList.toggle('hide', on);
+    if (this.brakeBtn) this.brakeBtn.classList.toggle('wide', on);
+    try { localStorage.setItem('rs3.autogas', on ? '1' : '0'); } catch { /* ignore */ }
   }
   private down(name: string): boolean { return (this.held.get(name) ?? 0) > 0; }
   private async enableTilt(): Promise<void> {
@@ -70,6 +97,7 @@ export class Input {
     if (this.keys.has('ArrowLeft') || this.keys.has('KeyA') || this.down('left')) steerTarget += 1;
     if (this.keys.has('ArrowRight') || this.keys.has('KeyD') || this.down('right')) steerTarget -= 1;
     if (this.keys.has('ArrowUp') || this.keys.has('KeyW') || this.down('gas')) throttle = 1;
+    if (this.isTouch && this.autoGas && !this.down('brake')) throttle = 1;   // auto-accelerate: the right thumb only brakes
     if (this.keys.has('ArrowDown') || this.keys.has('KeyS') || this.keys.has('Space') || this.down('brake')) brake = 1;
     if (this.tilt) steerTarget = this.tiltSteer;
     const rate = (this.tilt ? 10 : steerTarget === 0 ? 6 : 3.5) * dt;   // buttons wind on slowly like a stick, tilt follows the hand
