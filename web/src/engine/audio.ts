@@ -16,10 +16,15 @@ export class EngineAudio {
   constructor(private mfd: Mfd) {}
   /** call SYNCHRONOUSLY inside a user gesture handler (iOS only unlocks audio there); decoding continues asynchronously */
   unlock(): void {
-    if (this.ctx) { if (this.ctx.state === 'suspended') void this.ctx.resume(); return; }
+    if (this.ctx) { if (this.ctx.state !== 'running') void this.ctx.resume().catch(() => {}); return; }
     const AC = (window as unknown as { AudioContext?: typeof AudioContext; webkitAudioContext?: typeof AudioContext }).AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!AC) return;
     const ctx = new AC(); this.ctx = ctx;
+    // iOS reports 'interrupted' after a call, Siri, another app's audio, app switching or screen lock; re-arm gesture resumes then
+    ctx.addEventListener('statechange', () => { if (ctx.state !== 'running') this.attachUnlock(); });
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && ctx.state !== 'running') { void ctx.resume().catch(() => {}); this.attachUnlock(); } });
+    addEventListener('focus', () => { if (ctx.state !== 'running') void ctx.resume().catch(() => {}); });
+    addEventListener('pageshow', () => { if (ctx.state !== 'running') void ctx.resume().catch(() => {}); });
     const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -14; comp.knee.value = 12; comp.ratio.value = 4; comp.attack.value = 0.005; comp.release.value = 0.12;
     this.master = ctx.createGain(); this.master.gain.value = 0.5; this.master.connect(comp); comp.connect(ctx.destination);
     const b = ctx.createBuffer(1, 1, 22050); const src = ctx.createBufferSource(); src.buffer = b; src.connect(ctx.destination); src.start();
@@ -66,9 +71,11 @@ export class EngineAudio {
   set volume(v: number) { if (this.master) this.master.gain.value = v; }
   get state(): string { return this.ctx ? this.ctx.state : 'none'; }
   debug(): Record<string, unknown> { return { state: this.state, ready: this.ready, buffers: [...this.buffers.keys()].map(k => k.toString(16)), errors: this.errors, master: this.master?.gain.value, gains: LAYERS.map(l => l.gain ? +l.gain.gain.value.toFixed(3) : null), rates: LAYERS.map(l => l.src ? +l.src.playbackRate.value.toFixed(3) : null), lastRpm: this.lastRpm, sampleRate: this.ctx?.sampleRate }; }
+  private unlockArmed = false;
   attachUnlock(): void {
-    const tryUnlock = () => { this.unlock(); if (this.ctx && this.ctx.state === 'running') for (const t of types) removeEventListener(t, tryUnlock, true); };
-    const types = ['touchend', 'click', 'pointerup', 'keydown'];
+    if (this.unlockArmed) return; this.unlockArmed = true;
+    const types = ['touchend', 'touchstart', 'click', 'pointerup', 'pointerdown', 'keydown'];
+    const tryUnlock = () => { this.unlock(); if (this.ctx && this.ctx.state === 'running') { for (const t of types) removeEventListener(t, tryUnlock, true); this.unlockArmed = false; } };
     for (const t of types) addEventListener(t, tryUnlock, true);
   }
 }

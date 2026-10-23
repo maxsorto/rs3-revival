@@ -95,7 +95,7 @@ export async function startGame(track: string, host: HTMLElement, log: (s: strin
   menuBtn.style.cssText = (isTouch ? 'position:fixed;left:max(12px,env(safe-area-inset-left));top:max(10px,env(safe-area-inset-top));' : 'position:fixed;left:12px;bottom:12px;') + 'font:700 13px ui-monospace;color:#fff;text-decoration:none;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.5);border-radius:8px;padding:8px 14px;z-index:5';
   document.body.appendChild(menuBtn);
   const sndBtn = document.createElement('button'); let soundOn = !mute;
-  const sndLabel = () => { const st = audio.state; sndBtn.textContent = !soundOn ? 'SOUND OFF' : st === 'running' ? 'SOUND ON' : st === 'none' ? 'SOUND: TAP' : `SOUND: ${st.toUpperCase()}`; if (audio.errors.length) sndBtn.textContent += ' !'; };
+  const sndLabel = () => { const st = audio.state; sndBtn.textContent = !soundOn ? 'SOUND OFF' : st === 'running' ? 'SOUND ON' : st === 'none' ? 'SOUND: TAP' : 'SOUND: TAP TO RESUME'; if (audio.errors.length) sndBtn.textContent += ' !'; };
   sndLabel(); setInterval(sndLabel, 500);
   sndBtn.style.cssText = (isTouch ? 'position:fixed;right:max(12px,env(safe-area-inset-right));top:max(96px,calc(env(safe-area-inset-top) + 88px));' : 'position:fixed;right:12px;bottom:44px;') + 'font:700 12px ui-monospace;color:#fff;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.5);border-radius:8px;padding:6px 10px;z-index:5;-webkit-tap-highlight-color:transparent';
   // a real click/touchend on this button is a full user activation on iOS: create or resume the context right here
