@@ -55,23 +55,26 @@ import { Catalog } from './engine/data/catalog';
 import { F1Car } from './engine/f1mc/car';
 /** ?carshots: render every livery to a 480x270 PNG (data URLs on window.rs3shots) for the start menu */
 export async function startCarShots(host: HTMLElement, log: (s: string) => void): Promise<void> {
-  const W = 480, H = 270;
+  const q = new URLSearchParams(location.search);
+  const W = Number(q.get('w') ?? 480), H = Number(q.get('h') ?? 270), only = q.get('only');
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
   renderer.setPixelRatio(1); renderer.setSize(W, H); host.appendChild(renderer.domElement);
   const scene = new THREE.Scene();
   scene.add(new THREE.HemisphereLight(0xffffff, 0x334455, 1.3)); const sun = new THREE.DirectionalLight(0xffffff, 1.6); sun.position.set(2, 3, 2); scene.add(sun);
-  const cam = new THREE.PerspectiveCamera(28, W / H, 0.1, 50);
+  if (q.has('hero')) { const rim = new THREE.DirectionalLight(0x88aaff, 1.2); rim.position.set(-3, 2, -2); scene.add(rim); }
+  const cam = new THREE.PerspectiveCamera(Number(q.get('fov') ?? 28), W / H, 0.1, 50);
   const [txCars, txCom, common, chassis] = await Promise.all([Mfd.load(dataUrl('/data/TxCars.mfd')), Mfd.load(dataUrl('/data/TxTrkCom.mfd')), Setup.load(dataUrl('/setups/0017.json')), Setup.load(dataUrl('/setups/3786.json'))]);
   const car = new F1Car(chassis, new Catalog(common), 'soft');
   const tex = new TextureSource([txCars, txCom]);
   const world = new THREE.Group(); world.rotation.x = -Math.PI / 2; scene.add(world);
   const shots: string[] = [];
-  for (let i = 0; i < 22; i++) {
+  const list = only !== null ? [Number(only)] : Array.from({ length: 22 }, (_, i) => i);
+  for (const i of list) {
     const m = await loadCarModel(i, tex);
     const node = new THREE.Group(); node.add(m.group); world.add(node);
-    m.wheels.forEach((w, k) => { const pw = car.wheels[k]; w.position.set(pw.local.x, pw.local.y, pw.restZ); });
-    // three-quarter front view, car centred
-    cam.position.set(4.3, 1.25, 3.1); cam.lookAt(0.1, 0.2, 0);
+    m.wheels.forEach((w, k) => { const pw = car.wheels[k]; w.position.set(pw.local.x, pw.local.y, pw.restZ); if (q.has('hero')) w.rotation.z = k < 2 || k === 2 ? (k === 0 || k === 2 ? -0.18 : 0) : 0; });
+    // three-quarter front view, car centred; hero = lower, closer, wider
+    if (q.has('hero')) { cam.position.set(4.6, 0.75, 2.6); cam.lookAt(0.4, 0.15, -0.1); } else { cam.position.set(4.3, 1.25, 3.1); cam.lookAt(0.1, 0.2, 0); }
     renderer.render(scene, cam);
     shots.push(renderer.domElement.toDataURL('image/png'));
     world.remove(node);
