@@ -6,18 +6,18 @@ export class Input {
   state: InputState = { steer: 0, throttle: 0, brake: 0, gearUp: false, gearDown: false };
   private keys = new Set<string>();
   private held = new Map<string, number>();   // on-screen button name → number of active pointers
-  private tilt = false; private tiltSteer = 0; private tiltBtn: HTMLElement | null = null; private steerBtns: HTMLElement[] = [];
+  private tilt = false; private tiltSteer = 0; private steerBtns: HTMLElement[] = []; tiltError = '';
   readonly isTouch = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window || new URLSearchParams(location.search).has('touch');
-  constructor(el: HTMLElement, private bar?: HTMLElement) {
+  constructor(el: HTMLElement, _bar?: HTMLElement) {
     addEventListener('keydown', e => { this.keys.add(e.code); if (e.code === 'KeyE') this.state.gearUp = true; if (e.code === 'KeyQ') this.state.gearDown = true; });
     addEventListener('keyup', e => this.keys.delete(e.code));
     addEventListener('blur', () => this.keys.clear());
     el.addEventListener('touchstart', e => e.preventDefault(), { passive: false });   // no scroll/zoom on the canvas
-    if (this.isTouch) this.buildTouchControls();
+    if (this.isTouch) this.buildTouchControls(); else { try { this.autoGas = localStorage.getItem('rs3.autogas') === '1'; } catch { /* ignore */ } }
   }
-  private autoGas = true; private autoBtn: HTMLElement | null = null; private gasBtn: HTMLElement | null = null; private brakeBtn: HTMLElement | null = null;
+  private autoGas = false; private gasBtn: HTMLElement | null = null; private brakeBtn: HTMLElement | null = null;
   private buildTouchControls(): void {
-    try { this.autoGas = localStorage.getItem('rs3.autogas') !== '0'; } catch { /* ignore */ }
+    this.autoGas = true; try { this.autoGas = localStorage.getItem('rs3.autogas') !== '0'; } catch { /* ignore */ }
     const root = document.createElement('div');
     root.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:4;font-family:-apple-system,Helvetica,Arial,sans-serif;user-select:none;-webkit-user-select:none';
     root.innerHTML = `<style>
@@ -49,31 +49,23 @@ export class Input {
     this.steerBtns.push(mk('right', '▶', 'right'));
     this.brakeBtn = mk('brake', 'BRAKE', 'brake');
     this.gasBtn = mk('gas', 'GAS', 'gas');
-    // top bar toggles: AUTO GAS (default on, like the big mobile racers) and TILT steering
-    const host = this.bar ?? root;
-    const ab = document.createElement('div'); ab.className = 'tt'; if (!this.bar) ab.style.cssText = 'left:50%;transform:translateX(-100%);margin-left:-8px';
-    ab.addEventListener('click', () => this.setAutoGas(!this.autoGas)); host.appendChild(ab); this.autoBtn = ab;
-    const tb = document.createElement('div'); tb.className = 'tt'; if (!this.bar) tb.style.cssText = 'left:50%;margin-left:8px'; tb.textContent = 'TILT: OFF';
-    tb.addEventListener('click', () => { if (this.tilt) this.setTilt(false); else void this.enableTilt(); });
-    host.appendChild(tb); this.tiltBtn = tb;
-    let saved = false; try { saved = localStorage.getItem('rs3.tilt') === '1'; } catch { /* ignore */ }
-    if (saved) tb.textContent = 'TILT: TAP TO ENABLE';
     document.body.appendChild(root);
-    if (this.bar) { const st = document.createElement('style'); st.textContent = '.tt{position:static}'; this.bar.appendChild(st); }
     this.setAutoGas(this.autoGas);
   }
-  private setAutoGas(on: boolean): void {
+  get autoGasOn(): boolean { return this.autoGas; }
+  get tiltOn(): boolean { return this.tilt; }
+  async toggleTilt(): Promise<boolean> { if (this.tilt) this.setTilt(false); else await this.enableTilt(); return this.tilt; }
+  setAutoGas(on: boolean): void {
     this.autoGas = on;
-    if (this.autoBtn) this.autoBtn.textContent = on ? 'AUTO GAS: ON' : 'AUTO GAS: OFF';
     if (this.gasBtn) this.gasBtn.classList.toggle('hide', on);
     if (this.brakeBtn) this.brakeBtn.classList.toggle('wide', on);
     try { localStorage.setItem('rs3.autogas', on ? '1' : '0'); } catch { /* ignore */ }
   }
   private down(name: string): boolean { return (this.held.get(name) ?? 0) > 0; }
-  private async enableTilt(): Promise<void> {
+  async enableTilt(): Promise<void> {
     const DOE = (window as unknown as { DeviceOrientationEvent?: { requestPermission?: () => Promise<string> } }).DeviceOrientationEvent;
-    try { if (DOE?.requestPermission) { const r = await DOE.requestPermission(); if (r !== 'granted') { if (this.tiltBtn) this.tiltBtn.textContent = 'TILT: DENIED'; return; } } } catch { if (this.tiltBtn) this.tiltBtn.textContent = 'TILT: NEEDS HTTPS'; return; }
-    this.setTilt(true);
+    try { if (DOE?.requestPermission) { const r = await DOE.requestPermission(); if (r !== 'granted') { this.tiltError = 'Motion access was denied'; return; } } } catch { this.tiltError = 'Tilt needs the https site'; return; }
+    this.tiltError = ''; this.setTilt(true);
   }
   private onOrient = (e: DeviceOrientationEvent) => {
     // landscape: rolling the phone like a wheel changes beta (front/back axis tilt); sign depends on which way the phone is turned
@@ -84,11 +76,10 @@ export class Input {
     const dead = 3; const v = Math.abs(raw) < dead ? 0 : (raw - Math.sign(raw) * dead) / (30 - dead);
     this.tiltSteer = -v;   // tilt right (clockwise) = steer right = negative
   };
-  private setTilt(on: boolean): void {
+  setTilt(on: boolean): void {
     this.tilt = on; this.tiltSteer = 0;
     if (on) addEventListener('deviceorientation', this.onOrient); else removeEventListener('deviceorientation', this.onOrient);
     for (const b of this.steerBtns) b.style.display = on ? 'none' : 'flex';
-    if (this.tiltBtn) this.tiltBtn.textContent = on ? 'TILT: ON' : 'TILT: OFF';
     try { localStorage.setItem('rs3.tilt', on ? '1' : '0'); } catch { /* ignore */ }
   }
   /** called once per frame; steering is smoothed like a stick (rate-limited) */
@@ -97,7 +88,7 @@ export class Input {
     if (this.keys.has('ArrowLeft') || this.keys.has('KeyA') || this.down('left')) steerTarget += 1;
     if (this.keys.has('ArrowRight') || this.keys.has('KeyD') || this.down('right')) steerTarget -= 1;
     if (this.keys.has('ArrowUp') || this.keys.has('KeyW') || this.down('gas')) throttle = 1;
-    if (this.isTouch && this.autoGas && !this.down('brake')) throttle = 1;   // auto-accelerate: the right thumb only brakes
+    if (this.autoGas && brake === 0) throttle = 1;   // auto-accelerate: only braking lifts off
     if (this.keys.has('ArrowDown') || this.keys.has('KeyS') || this.keys.has('Space') || this.down('brake')) brake = 1;
     if (this.tilt) steerTarget = this.tiltSteer;
     const rate = (this.tilt ? 10 : steerTarget === 0 ? 6 : 3.5) * dt;   // buttons wind on slowly like a stick, tilt follows the hand

@@ -15,6 +15,7 @@ import { Vec3 } from './engine/mth/vec3';
 import { Input } from './input';
 import { EngineAudio } from './engine/audio';
 import { showLoading } from './loading';
+import { PauseMenu } from './pause';
 
 const g2t = (v: Vec3, out = new THREE.Vector3()) => out.set(v.x, v.z, -v.y);   // game (x,y ground, z up, right-handed: lap runs clockwise in raw xy) -> three (y up)
 
@@ -79,6 +80,10 @@ export async function startGame(track: string, host: HTMLElement, log: (s: strin
   const audio = new EngineAudio(sound); const mute = new URLSearchParams(location.search).has('mute');
   const startAudio = () => { if (!mute) { audio.unlock(); audio.attachUnlock(); } };
   let started = false;
+  loading.options([
+    { label: 'Auto gas', hint: 'car accelerates by itself', get: () => input.autoGasOn, set: () => input.setAutoGas(!input.autoGasOn) },
+    ...(isTouch ? [{ label: 'Tilt steering', hint: 'tilt the phone to steer', get: () => input.tiltOn, set: () => input.toggleTilt().then(() => undefined) }] : []),
+  ]);
   loading.done(startAudio).then(() => { started = true; });
   (window as unknown as { rs3: unknown }).rs3 = { car, road, grid, camera, carModel, timer, sectors, resetCar, audio };
   const orbit = new URLSearchParams(location.search).get('orbit');
@@ -99,6 +104,7 @@ export async function startGame(track: string, host: HTMLElement, log: (s: strin
   const menuBtn = document.createElement('a'); menuBtn.textContent = 'MENU'; menuBtn.href = '/';
   menuBtn.style.cssText = (isTouch ? 'pointer-events:auto;' : 'position:fixed;left:12px;bottom:12px;') + 'font:700 12px ui-monospace;color:#fff;text-decoration:none;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.5);border-radius:8px;padding:8px 12px;z-index:5';
   if (isTouch) { bar.prepend(menuBtn); bar.appendChild(resetBtn); } else document.body.appendChild(menuBtn);
+  let last = performance.now();
   const sndBtn = document.createElement('button'); let soundOn = !mute;
   const sndLabel = () => { const st = audio.state; sndBtn.textContent = !soundOn ? 'SOUND OFF' : st === 'running' ? 'SOUND ON' : st === 'none' ? 'SOUND: TAP' : 'SOUND: TAP TO RESUME'; if (audio.errors.length) sndBtn.textContent += ' !'; };
   sndLabel(); setInterval(sndLabel, 500);
@@ -106,7 +112,23 @@ export async function startGame(track: string, host: HTMLElement, log: (s: strin
   // a real click/touchend on this button is a full user activation on iOS: create or resume the context right here
   const sndTap = () => { if (!soundOn || audio.state !== 'running') { soundOn = true; audio.unlock(); audio.attachUnlock(); audio.volume = 0.5; } else { soundOn = false; audio.volume = 0; } sndLabel(); };
   sndBtn.addEventListener('click', sndTap); sndBtn.addEventListener('touchend', e => { e.preventDefault(); sndTap(); }, { passive: false });
-  if (isTouch) bar.appendChild(sndBtn); else document.body.appendChild(sndBtn);
+  if (!isTouch) document.body.appendChild(sndBtn);
+  let paused = false;
+  const pause = new PauseMenu({
+    isTouch,
+    get: () => ({ autoGas: input.autoGasOn, tilt: input.tiltOn, sound: soundOn && audio.state !== 'none' ? true : soundOn }),
+    setAutoGas: on => input.setAutoGas(on), toggleTilt: () => input.toggleTilt(), tiltError: () => input.tiltError,
+    setSound: on => { soundOn = on; if (on) { audio.unlock(); audio.attachUnlock(); audio.volume = 0.5; } else audio.volume = 0; sndLabel(); },
+    onResume: () => { paused = false; last = performance.now(); if (soundOn) audio.volume = 0.5; },
+    onRestart: () => { placeAt(slot.pos, slot.dir); timer.reset(car.pos); timer.lap = 0; timer.last = -1; },
+  });
+  const doPause = () => { if (!started || paused) return; paused = true; audio.volume = 0; pause.show(); };
+  addEventListener('keydown', e => { if (e.code === 'Escape' || e.code === 'KeyP') { if (paused) pause.hide(); else doPause(); } });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') doPause(); });
+  const pauseBtn = document.createElement('button'); pauseBtn.textContent = 'PAUSE';
+  pauseBtn.style.cssText = (isTouch ? 'pointer-events:auto;' : 'position:fixed;left:12px;bottom:44px;') + 'font:700 12px ui-monospace;color:#fff;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.5);border-radius:8px;padding:8px 12px;z-index:5;-webkit-tap-highlight-color:transparent';
+  pauseBtn.addEventListener('click', doPause);
+  if (isTouch) bar.appendChild(pauseBtn); else document.body.appendChild(pauseBtn);
   if (!isTouch) {
     const legend = document.createElement('div'); legend.innerHTML = '<b>↑</b> gas &nbsp; <b>↓</b>/space brake &nbsp; <b>← →</b> steer &nbsp; <b>R</b> reset';
     legend.style.cssText = 'position:fixed;left:50%;bottom:14px;transform:translateX(-50%);font:13px -apple-system,Helvetica,Arial,sans-serif;color:#fff;text-shadow:0 1px 3px #000;opacity:.85;pointer-events:none;white-space:nowrap';
@@ -118,13 +140,14 @@ export async function startGame(track: string, host: HTMLElement, log: (s: strin
   document.body.appendChild(fpsEl);
   const tmpM = new THREE.Matrix4(), q = new THREE.Quaternion();
   const camPos = new THREE.Vector3(), camTarget = new THREE.Vector3();
-  let acc = 0, last = performance.now(); const DT = 1 / 200;
+  let acc = 0; const DT = 1 / 200;
   renderer.setAnimationLoop(now => {
     const frame = Math.min(0.05, (now - last) / 1000); last = now; acc += frame;
     const inp = input.poll(frame); if (!started) { inp.throttle = 0; inp.brake = 1; inp.steer = 0; }
     if (!inp.throttle && !inp.brake && car.speedNorm() < 1.5) inp.brake = 1;   // parking brake while idle
     car.cmd.steering = inp.steer * car.maxSteering; car.cmd.throttle = inp.throttle; car.cmd.brake = inp.brake;   // steer +1 = left: positive steering yaws counter-clockwise (+z up), verified by a 1 s steer test
     if (inp.gearUp) car.cmd.nextGear = NextGear.Up; if (inp.gearDown) car.cmd.nextGear = NextGear.Down;
+    if (paused) acc = 0;
     while (acc >= DT) { car.move(DT, road); timer.update(DT, car.pos); acc -= DT; }
     // car pose: rotation matrix columns are the car axes in game space
     const m = car.R.m;
